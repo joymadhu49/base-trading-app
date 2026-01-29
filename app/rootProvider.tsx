@@ -1,13 +1,12 @@
 "use client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { WagmiProvider } from "wagmi";
-import { http } from "wagmi";
+import { createConfig, http, WagmiProvider } from "wagmi";
 import { base } from "wagmi/chains";
 import { coinbaseWallet } from "wagmi/connectors";
 import { useState, type ReactNode } from "react";
 
-// Configure wagmi
-const config = {
+// Create config outside component
+const config = createConfig({
   chains: [base],
   connectors: [
     coinbaseWallet({
@@ -17,10 +16,16 @@ const config = {
   transports: {
     [base.id]: http(),
   },
-};
+});
 
 export function RootProvider({ children }: { children: ReactNode }) {
-  const [queryClient] = useState(() => new QueryClient());
+  const [queryClient] = useState(() => new QueryClient({
+    defaultOptions: {
+      queries: {
+        refetchOnWindowFocus: false,
+      },
+    },
+  }));
 
   return (
     <WagmiProvider config={config}>
