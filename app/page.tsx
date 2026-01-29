@@ -1,6 +1,5 @@
 "use client";
 import styles from "./page.module.css";
-import type { Token } from "@coinbase/onchainkit/token";
 import { useState } from "react";
 import { useAccount, useConnect, useDisconnect } from "wagmi";
 
@@ -34,7 +33,7 @@ function WalletButton() {
   );
 }
 
-// Simple Swap Component (inline to avoid import issues)
+// Simple Swap Component
 function SwapInterface() {
   const [fromToken, setFromToken] = useState("ETH");
   const [toToken, setToToken] = useState("USDC");
