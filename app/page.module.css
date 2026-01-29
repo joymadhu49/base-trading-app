@@ -1,39 +1,111 @@
 .container {
-  display: grid;
-  grid-template-rows: auto 1fr;
   min-height: 100vh;
-}
-
-.headerWrapper {
-  display: flex;
-  justify-content: flex-end;
-  padding: 1rem;
-}
-
-.content {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding-bottom: 5vh;
+  padding: 2rem;
+  background: linear-gradient(180deg, #0a0a0a 0%, #1a1a2e 100%);
+  color: #fff;
+}
+
+.headerWrapper {
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 2rem;
+}
+
+.content {
+  width: 100%;
+  max-width: 480px;
+  text-align: center;
 }
 
 .title {
-  font-size: clamp(2rem, 8vw, 80px);
-  font-weight: 500;
-  letter-spacing: -0.02em;
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(90deg, #0052FF, #00d4ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-.componentsTitle {
-  font-weight: 600;
-  margin-top: 2rem;
+.subtitle {
+  color: #888;
+  margin-bottom: 2rem;
 }
 
-.components {
-  list-style-type: disc;
-  margin-top: 0.75rem;
+.swapContainer {
+  background: #1a1a2e;
+  border-radius: 16px;
+  padding: 1.5rem;
+  border: 1px solid #333;
+  margin-bottom: 2rem;
 }
 
-.components a:hover {
-  text-decoration: underline;
+.connectPrompt {
+  background: #1a1a2e;
+  border-radius: 16px;
+  padding: 2rem;
+  border: 1px solid #333;
+  margin-bottom: 2rem;
+}
+
+.connectPrompt p {
+  margin-bottom: 1rem;
+  color: #888;
+}
+
+.connectButton {
+  background: #0052FF !important;
+  color: white !important;
+  padding: 0.75rem 1.5rem !important;
+  border-radius: 8px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  border: none !important;
+  cursor: pointer;
+}
+
+.infoCards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.infoCard {
+  background: #1a1a2e;
+  border-radius: 12px;
+  padding: 1rem;
+  border: 1px solid #333;
+  text-align: left;
+}
+
+.infoCard h3 {
+  font-size: 0.875rem;
+  color: #888;
+  margin-bottom: 0.5rem;
+}
+
+.infoCard ul {
+  list-style: none;
+  padding: 0;
+}
+
+.infoCard li {
+  font-size: 0.875rem;
+  padding: 0.25rem 0;
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 1rem;
+  }
+  
+  .infoCards {
+    grid-template-columns: 1fr;
+  }
 }
