@@ -100,7 +100,17 @@ const CBBTC: Token = {
 
 const swappableTokens: Token[] = [ETHToken, USDCToken, DEGENToken, CBBTC];
 
-type Tab = "swap" | "buy";
+// Market data (would come from API in production)
+const marketData = [
+  { symbol: "cbBTC", price: "$88,345", change: "+0.14%", positive: true },
+  { symbol: "ETH", price: "$3,241", change: "+1.23%", positive: true },
+  { symbol: "USDC", price: "$1.00", change: "0.00%", positive: true },
+  { symbol: "DEGEN", price: "$0.0419", change: "-4.39%", positive: false },
+  { symbol: "VIRTUAL", price: "$0.807", change: "-0.36%", positive: false },
+  { symbol: "CLAWD", price: "$0.000201", change: "-6.19%", positive: false },
+];
+
+type Tab = "swap" | "buy" | "portfolio";
 
 export default function Home() {
   const { address } = useAccount();
@@ -119,7 +129,7 @@ export default function Home() {
 
       <div className={styles.content}>
         <h1 className={styles.title}>Base Trading App</h1>
-        <p className={styles.subtitle}>Swap & Buy crypto on Base</p>
+        <p className={styles.subtitle}>Swap, Buy & Track on Base</p>
 
         {/* Tab Navigation */}
         <div className={styles.tabs}>
@@ -135,11 +145,17 @@ export default function Home() {
           >
             Buy
           </button>
+          <button
+            className={`${styles.tab} ${activeTab === "portfolio" ? styles.activeTab : ""}`}
+            onClick={() => setActiveTab("portfolio")}
+          >
+            Portfolio
+          </button>
         </div>
 
         {address ? (
           <div className={styles.swapContainer}>
-            {activeTab === "swap" ? (
+            {activeTab === "swap" && (
               <Swap isSponsored>
                 <SwapAmountInput
                   label="Sell"
@@ -158,9 +174,45 @@ export default function Home() {
                 <SwapMessage />
                 <SwapToast />
               </Swap>
-            ) : (
+            )}
+
+            {activeTab === "buy" && (
               <div className={styles.buyContainer}>
                 <Buy toToken={DEGENToken} isSponsored />
+              </div>
+            )}
+
+            {activeTab === "portfolio" && (
+              <div className={styles.portfolioContainer}>
+                <div className={styles.portfolioHeader}>
+                  <h3>Your Portfolio</h3>
+                  <span className={styles.totalValue}>$0.00</span>
+                </div>
+                <div className={styles.portfolioList}>
+                  <div className={styles.portfolioItem}>
+                    <div className={styles.tokenInfo}>
+                      <span className={styles.tokenSymbol}>ETH</span>
+                      <span className={styles.tokenName}>Ethereum</span>
+                    </div>
+                    <div className={styles.tokenBalance}>
+                      <span className={styles.balance}>0.00 ETH</span>
+                      <span className={styles.balanceUsd}>$0.00</span>
+                    </div>
+                  </div>
+                  <div className={styles.portfolioItem}>
+                    <div className={styles.tokenInfo}>
+                      <span className={styles.tokenSymbol}>USDC</span>
+                      <span className={styles.tokenName}>USD Coin</span>
+                    </div>
+                    <div className={styles.tokenBalance}>
+                      <span className={styles.balance}>0.00 USDC</span>
+                      <span className={styles.balanceUsd}>$0.00</span>
+                    </div>
+                  </div>
+                </div>
+                <p className={styles.connectWalletText}>
+                  Connect wallet to view holdings
+                </p>
               </div>
             )}
           </div>
@@ -176,6 +228,22 @@ export default function Home() {
           </div>
         )}
 
+        {/* Market Data Section */}
+        <div className={styles.marketSection}>
+          <h3 className={styles.sectionTitle}>📈 Trending on Base</h3>
+          <div className={styles.marketGrid}>
+            {marketData.map((token) => (
+              <div key={token.symbol} className={styles.marketCard}>
+                <span className={styles.marketSymbol}>{token.symbol}</span>
+                <span className={styles.marketPrice}>{token.price}</span>
+                <span className={`${styles.marketChange} ${token.positive ? styles.positive : styles.negative}`}>
+                  {token.change}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
         <div className={styles.infoCards}>
           <div className={styles.infoCard}>
             <h3>Supported Tokens</h3>
@@ -187,12 +255,12 @@ export default function Home() {
             </ul>
           </div>
           <div className={styles.infoCard}>
-            <h3>Payment Methods</h3>
+            <h3>Features</h3>
             <ul>
-              <li>✓ Coinbase Account</li>
-              <li>✓ Apple Pay</li>
-              <li>✓ Debit Card</li>
-              <li>✓ Gasless transactions</li>
+              <li>✓ Gasless swaps</li>
+              <li>✓ Apple Pay / Debit</li>
+              <li>✓ Low fees (&lt;$0.01)</li>
+              <li>✓ 2s block time</li>
             </ul>
           </div>
         </div>

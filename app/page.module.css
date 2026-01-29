@@ -82,6 +82,86 @@
   min-height: 400px;
 }
 
+.portfolioContainer {
+  text-align: left;
+}
+
+.portfolioHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #333;
+}
+
+.portfolioHeader h3 {
+  font-size: 1rem;
+  color: #888;
+}
+
+.totalValue {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #00C853;
+}
+
+.portfolioList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.portfolioItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  background: #0a0a0a;
+  border-radius: 8px;
+}
+
+.tokenInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.tokenSymbol {
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.tokenName {
+  font-size: 0.75rem;
+  color: #888;
+}
+
+.tokenBalance {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.balance {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.balanceUsd {
+  font-size: 0.75rem;
+  color: #888;
+}
+
+.connectWalletText {
+  text-align: center;
+  color: #666;
+  font-size: 0.875rem;
+  margin-top: 2rem;
+  padding: 1rem;
+  background: #0a0a0a;
+  border-radius: 8px;
+}
+
 .connectPrompt {
   background: #1a1a2e;
   border-radius: 16px;
@@ -105,6 +185,62 @@
   gap: 0.5rem !important;
   border: none !important;
   cursor: pointer;
+}
+
+/* Market Section */
+.marketSection {
+  margin-bottom: 1.5rem;
+  width: 100%;
+}
+
+.sectionTitle {
+  font-size: 0.875rem;
+  color: #888;
+  margin-bottom: 0.75rem;
+  text-align: left;
+}
+
+.marketGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+}
+
+.marketCard {
+  background: #1a1a2e;
+  border-radius: 8px;
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 1px solid #333;
+}
+
+.marketSymbol {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.marketPrice {
+  font-size: 0.75rem;
+  margin: 0.25rem 0;
+}
+
+.marketChange {
+  font-size: 0.625rem;
+  padding: 0.125rem 0.375rem;
+  border-radius: 4px;
+}
+
+.positive {
+  color: #00C853;
+  background: rgba(0, 200, 83, 0.1);
+}
+
+.negative {
+  color: #FF5252;
+  background: rgba(255, 82, 82, 0.1);
 }
 
 .infoCards {
@@ -144,5 +280,9 @@
   
   .infoCards {
     grid-template-columns: 1fr;
+  }
+  
+  .marketGrid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
