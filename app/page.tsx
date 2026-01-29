@@ -1,7 +1,12 @@
 "use client";
-import Image from "next/image";
+import dynamic from "next/dynamic";
 import styles from "./page.module.css";
-import { Wallet } from "@coinbase/onchainkit/wallet";
+
+// Dynamic import to avoid hydration mismatch
+const Wallet = dynamic(
+  () => import("@coinbase/onchainkit/wallet").then((mod) => mod.Wallet),
+  { ssr: false }
+);
 
 export default function Home() {
   return (
@@ -11,51 +16,28 @@ export default function Home() {
       </header>
 
       <div className={styles.content}>
-        <Image
-          priority
-          src="/sphere.svg"
-          alt="Sphere"
-          width={200}
-          height={200}
-        />
-        <h1 className={styles.title}>OnchainKit</h1>
-
-        <p>
-          Get started by editing <code>app/page.tsx</code>
-        </p>
-
-        <h2 className={styles.componentsTitle}>Explore Components</h2>
-
-        <ul className={styles.components}>
-          {[
-            {
-              name: "Transaction",
-              url: "https://docs.base.org/onchainkit/transaction/transaction",
-            },
-            {
-              name: "Swap",
-              url: "https://docs.base.org/onchainkit/swap/swap",
-            },
-            {
-              name: "Checkout",
-              url: "https://docs.base.org/onchainkit/checkout/checkout",
-            },
-            {
-              name: "Wallet",
-              url: "https://docs.base.org/onchainkit/wallet/wallet",
-            },
-            {
-              name: "Identity",
-              url: "https://docs.base.org/onchainkit/identity/identity",
-            },
-          ].map((component) => (
-            <li key={component.name}>
-              <a target="_blank" rel="noreferrer" href={component.url}>
-                {component.name}
-              </a>
-            </li>
-          ))}
-        </ul>
+        <h1 className={styles.title}>Base Trading App</h1>
+        
+        <p>Your crypto trading hub on Base</p>
+        
+        <div style={{ marginTop: "2rem", display: "flex", gap: "1rem", flexWrap: "wrap", justifyContent: "center" }}>
+          <a 
+            href="https://docs.base.org/onchainkit/swap/swap" 
+            target="_blank" 
+            rel="noreferrer"
+            style={{ padding: "0.75rem 1.5rem", background: "#0052FF", color: "white", borderRadius: "8px", textDecoration: "none" }}
+          >
+            Swap Tokens
+          </a>
+          <a 
+            href="https://docs.base.org/onchainkit/buy/buy" 
+            target="_blank" 
+            rel="noreferrer"
+            style={{ padding: "0.75rem 1.5rem", background: "#0052FF", color: "white", borderRadius: "8px", textDecoration: "none" }}
+          >
+            Buy Crypto
+          </a>
+        </div>
       </div>
     </div>
   );
