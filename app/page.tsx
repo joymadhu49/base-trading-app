@@ -2,6 +2,7 @@
 import dynamic from "next/dynamic";
 import styles from "./page.module.css";
 import type { Token } from "@coinbase/onchainkit/token";
+import { useState } from "react";
 import { useAccount } from "wagmi";
 
 // Dynamic imports to avoid SSR issues
@@ -55,6 +56,11 @@ const SwapToast = dynamic(
   { ssr: false }
 );
 
+const Buy = dynamic(
+  () => import("@coinbase/onchainkit/buy").then((mod) => mod.Buy),
+  { ssr: false }
+);
+
 // Token definitions
 const ETHToken: Token = {
   address: "",
@@ -83,10 +89,22 @@ const DEGENToken: Token = {
   image: "https://d3r81g40ycuhqg.cloudfront.net/wallet/wais/3b/bf/3bbf118b5e6dc2f9e7fc607a6e7526647b4ba8f0bea87125f971446d57b296d2-MDNmNjY0MmEtNGFiZi00N2I0LWIwMTItMDUyMzg2ZDZhMWNm",
 };
 
-const swappableTokens: Token[] = [ETHToken, USDCToken, DEGENToken];
+const CBBTC: Token = {
+  address: "0xc211e1f853a898bd1302385ccde55f33a8c4b3f3",
+  chainId: 8453,
+  decimals: 8,
+  name: "cbBTC",
+  symbol: "cbBTC",
+  image: "https://dynamic-assets.coinbase.com/e52d2d94cb8c70e26f4e74cb0b9e3a289e62f7f1e3e6c2a8b3c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0",
+};
+
+const swappableTokens: Token[] = [ETHToken, USDCToken, DEGENToken, CBBTC];
+
+type Tab = "swap" | "buy";
 
 export default function Home() {
   const { address } = useAccount();
+  const [activeTab, setActiveTab] = useState<Tab>("swap");
 
   return (
     <div className={styles.container}>
@@ -101,28 +119,50 @@ export default function Home() {
 
       <div className={styles.content}>
         <h1 className={styles.title}>Base Trading App</h1>
-        <p className={styles.subtitle}>Swap tokens instantly on Base</p>
+        <p className={styles.subtitle}>Swap & Buy crypto on Base</p>
+
+        {/* Tab Navigation */}
+        <div className={styles.tabs}>
+          <button
+            className={`${styles.tab} ${activeTab === "swap" ? styles.activeTab : ""}`}
+            onClick={() => setActiveTab("swap")}
+          >
+            Swap
+          </button>
+          <button
+            className={`${styles.tab} ${activeTab === "buy" ? styles.activeTab : ""}`}
+            onClick={() => setActiveTab("buy")}
+          >
+            Buy
+          </button>
+        </div>
 
         {address ? (
           <div className={styles.swapContainer}>
-            <Swap isSponsored>
-              <SwapAmountInput
-                label="Sell"
-                swappableTokens={swappableTokens}
-                token={ETHToken}
-                type="from"
-              />
-              <SwapToggleButton />
-              <SwapAmountInput
-                label="Buy"
-                swappableTokens={swappableTokens}
-                token={USDCToken}
-                type="to"
-              />
-              <SwapButton />
-              <SwapMessage />
-              <SwapToast />
-            </Swap>
+            {activeTab === "swap" ? (
+              <Swap isSponsored>
+                <SwapAmountInput
+                  label="Sell"
+                  swappableTokens={swappableTokens}
+                  token={ETHToken}
+                  type="from"
+                />
+                <SwapToggleButton />
+                <SwapAmountInput
+                  label="Buy"
+                  swappableTokens={swappableTokens}
+                  token={USDCToken}
+                  type="to"
+                />
+                <SwapButton />
+                <SwapMessage />
+                <SwapToast />
+              </Swap>
+            ) : (
+              <div className={styles.buyContainer}>
+                <Buy toToken={DEGENToken} isSponsored />
+              </div>
+            )}
           </div>
         ) : (
           <div className={styles.connectPrompt}>
@@ -143,14 +183,16 @@ export default function Home() {
               <li>ETH - Ethereum</li>
               <li>USDC - USD Coin</li>
               <li>DEGEN - Degen</li>
+              <li>cbBTC - Coinbase BTC</li>
             </ul>
           </div>
           <div className={styles.infoCard}>
-            <h3>Features</h3>
+            <h3>Payment Methods</h3>
             <ul>
-              <li>✓ Gasless swaps</li>
-              <li>✓ Low fees (<$0.01)</li>
-              <li>✓ Fast (2s blocks)</li>
+              <li>✓ Coinbase Account</li>
+              <li>✓ Apple Pay</li>
+              <li>✓ Debit Card</li>
+              <li>✓ Gasless transactions</li>
             </ul>
           </div>
         </div>
