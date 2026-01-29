@@ -1,130 +1,249 @@
 "use client";
-import dynamic from "next/dynamic";
 import styles from "./page.module.css";
 import type { Token } from "@coinbase/onchainkit/token";
 import { useState } from "react";
-import { useAccount } from "wagmi";
+import { useAccount, useConnect, useDisconnect } from "wagmi";
 
-// Dynamic imports to avoid SSR issues
-const Wallet = dynamic(
-  () => import("@coinbase/onchainkit/wallet").then((mod) => mod.Wallet),
-  { ssr: false }
-);
+// Simpler wallet connection component
+function WalletButton() {
+  const { address, isConnected } = useAccount();
+  const { connect, connectors } = useConnect();
+  const { disconnect } = useDisconnect();
 
-const ConnectWallet = dynamic(
-  () => import("@coinbase/onchainkit/wallet").then((mod) => mod.ConnectWallet),
-  { ssr: false }
-);
+  if (isConnected && address) {
+    return (
+      <button className={styles.walletButton} onClick={() => disconnect()}>
+        <span className={styles.walletIcon}>👛</span>
+        <span>{address.slice(0, 6)}...{address.slice(-4)}</span>
+        <span className={styles.disconnectText}>Disconnect</span>
+      </button>
+    );
+  }
 
-const Avatar = dynamic(
-  () => import("@coinbase/onchainkit/identity").then((mod) => mod.Avatar),
-  { ssr: false }
-);
+  return (
+    <button 
+      className={styles.walletButton}
+      onClick={() => {
+        const connector = connectors[0];
+        if (connector) connect({ connector });
+      }}
+    >
+      <span className={styles.walletIcon}>🔗</span>
+      Connect Wallet
+    </button>
+  );
+}
 
-const Name = dynamic(
-  () => import("@coinbase/onchainkit/identity").then((mod) => mod.Name),
-  { ssr: false }
-);
+// Simple Swap Component (inline to avoid import issues)
+function SwapInterface() {
+  const [fromToken, setFromToken] = useState("ETH");
+  const [toToken, setToToken] = useState("USDC");
+  const [amount, setAmount] = useState("");
 
-const Swap = dynamic(
-  () => import("@coinbase/onchainkit/swap").then((mod) => mod.Swap),
-  { ssr: false }
-);
+  const tokens = [
+    { symbol: "ETH", name: "Ethereum", decimals: 18 },
+    { symbol: "USDC", name: "USD Coin", decimals: 6 },
+    { symbol: "DEGEN", name: "Degen", decimals: 18 },
+    { symbol: "cbBTC", name: "cbBTC", decimals: 8 },
+  ];
 
-const SwapAmountInput = dynamic(
-  () => import("@coinbase/onchainkit/swap").then((mod) => mod.SwapAmountInput),
-  { ssr: false }
-);
+  return (
+    <div className={styles.swapInterface}>
+      <div className={styles.swapInputGroup}>
+        <label className={styles.swapLabel}>Sell</label>
+        <div className={styles.swapInputRow}>
+          <input
+            type="number"
+            placeholder="0.00"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            className={styles.swapInput}
+          />
+          <select 
+            value={fromToken} 
+            onChange={(e) => setFromToken(e.target.value)}
+            className={styles.tokenSelect}
+          >
+            {tokens.map(t => (
+              <option key={t.symbol} value={t.symbol}>{t.symbol}</option>
+            ))}
+          </select>
+        </div>
+        <span className={styles.balanceText}>Balance: 0.00</span>
+      </div>
 
-const SwapToggleButton = dynamic(
-  () => import("@coinbase/onchainkit/swap").then((mod) => mod.SwapToggleButton),
-  { ssr: false }
-);
+      <div className={styles.swapDivider}>
+        <span>↓</span>
+      </div>
 
-const SwapButton = dynamic(
-  () => import("@coinbase/onchainkit/swap").then((mod) => mod.SwapButton),
-  { ssr: false }
-);
+      <div className={styles.swapInputGroup}>
+        <label className={styles.swapLabel}>Buy</label>
+        <div className={styles.swapInputRow}>
+          <input
+            type="text"
+            placeholder="0.00"
+            readOnly
+            className={styles.swapInput}
+          />
+          <select 
+            value={toToken} 
+            onChange={(e) => setToToken(e.target.value)}
+            className={styles.tokenSelect}
+          >
+            {tokens.map(t => (
+              <option key={t.symbol} value={t.symbol}>{t.symbol}</option>
+            ))}
+          </select>
+        </div>
+      </div>
 
-const SwapMessage = dynamic(
-  () => import("@coinbase/onchainkit/swap").then((mod) => mod.SwapMessage),
-  { ssr: false }
-);
+      <button className={styles.swapButton}>
+        Review Swap
+      </button>
 
-const SwapToast = dynamic(
-  () => import("@coinbase/onchainkit/swap").then((mod) => mod.SwapToast),
-  { ssr: false }
-);
+      <div className={styles.swapInfo}>
+        <span>Rate: 1 {fromToken} ≈ {fromToken === "ETH" && toToken === "USDC" ? "3,241.00" : "—"} USDC</span>
+        <span>Network: Base</span>
+      </div>
+    </div>
+  );
+}
 
-const Buy = dynamic(
-  () => import("@coinbase/onchainkit/buy").then((mod) => mod.Buy),
-  { ssr: false }
-);
+// Simple Buy Component
+function BuyInterface() {
+  return (
+    <div className={styles.buyInterface}>
+      <div className={styles.buyHeader}>
+        <h3>Buy Crypto</h3>
+        <p>Instant purchase with Apple Pay or Debit Card</p>
+      </div>
+      
+      <div className={styles.buyInputGroup}>
+        <label>Amount (USD)</label>
+        <div className={styles.buyInputRow}>
+          <span className={styles.currencySymbol}>$</span>
+          <input type="number" placeholder="0.00" className={styles.buyInput} />
+        </div>
+      </div>
 
-// Token definitions
-const ETHToken: Token = {
-  address: "",
-  chainId: 8453,
-  decimals: 18,
-  name: "Ethereum",
-  symbol: "ETH",
-  image: "https://dynamic-assets.coinbase.com/dbb4b4983bde81309ddab83eb598358eb44375b930b94687ebe38bc22e52c3b2125258ffb8477a5ef22e33d6bd72e32a506c391caa13af64c00e46613c3e5806/asset_icons/4113b082d21cc5fab17fc8f2d19fb996165bcce635e6900f7fc2d57c4ef33ae9.png",
-};
+      <div className={styles.buyMethods}>
+        <button className={styles.buyMethod}>
+          <span className={styles.methodIcon}>🍎</span>
+          <span>Apple Pay</span>
+        </button>
+        <button className={styles.buyMethod}>
+          <span className={styles.methodIcon}>💳</span>
+          <span>Debit Card</span>
+        </button>
+        <button className={styles.buyMethod}>
+          <span className={styles.methodIcon}>🏦</span>
+          <span>Bank Transfer</span>
+        </button>
+      </div>
 
-const USDCToken: Token = {
-  address: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-  chainId: 8453,
-  decimals: 6,
-  name: "USDC",
-  symbol: "USDC",
-  image: "https://dynamic-assets.coinbase.com/3c15df5e2ac7d4abbe9499ed9335041f00c620f28e8de2f93474a9f432058742cdf4674bd43f309e69778a26969372310135be97eb183d91c492154176d455b8/asset_icons/9d67b728b6c8f457717154b3a35f9ddc702eae7e76c4684ee39302c4d7fd0bb8.png",
-};
+      <div className={styles.buyTokenSelect}>
+        <label>Buy Token</label>
+        <select className={styles.tokenSelect}>
+          <option value="ETH">ETH - Ethereum</option>
+          <option value="USDC">USDC - USD Coin</option>
+          <option value="DEGEN">DEGEN</option>
+          <option value="cbBTC">cbBTC</option>
+        </select>
+      </div>
 
-const DEGENToken: Token = {
-  address: "0x4ed4e862860bed51a9570b96d89af5e1b0efefed",
-  chainId: 8453,
-  decimals: 18,
-  name: "DEGEN",
-  symbol: "DEGEN",
-  image: "https://d3r81g40ycuhqg.cloudfront.net/wallet/wais/3b/bf/3bbf118b5e6dc2f9e7fc607a6e7526647b4ba8f0bea87125f971446d57b296d2-MDNmNjY0MmEtNGFiZi00N2I0LWIwMTItMDUyMzg2ZDZhMWNm",
-};
+      <button className={styles.buyButton}>
+        Continue to Payment
+      </button>
 
-const CBBTC: Token = {
-  address: "0xc211e1f853a898bd1302385ccde55f33a8c4b3f3",
-  chainId: 8453,
-  decimals: 8,
-  name: "cbBTC",
-  symbol: "cbBTC",
-  image: "https://dynamic-assets.coinbase.com/e52d2d94cb8c70e26f4e74cb0b9e3a289e62f7f1e3e6c2a8b3c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0",
-};
+      <p className={styles.buyNote}>
+        Minimum purchase: $5 | Fees: ~2%
+      </p>
+    </div>
+  );
+}
 
-const swappableTokens: Token[] = [ETHToken, USDCToken, DEGENToken, CBBTC];
+// Portfolio Component
+function PortfolioInterface() {
+  const { address } = useAccount();
+  
+  const holdings = [
+    { symbol: "ETH", name: "Ethereum", balance: 0, price: 3241 },
+    { symbol: "USDC", name: "USD Coin", balance: 0, price: 1 },
+    { symbol: "DEGEN", name: "Degen", balance: 0, price: 0.0419 },
+    { symbol: "cbBTC", name: "cbBTC", balance: 0, price: 88345 },
+  ];
 
-// Market data (would come from API in production)
-const marketData = [
-  { symbol: "cbBTC", price: "$88,345", change: "+0.14%", positive: true },
-  { symbol: "ETH", price: "$3,241", change: "+1.23%", positive: true },
-  { symbol: "USDC", price: "$1.00", change: "0.00%", positive: true },
-  { symbol: "DEGEN", price: "$0.0419", change: "-4.39%", positive: false },
-  { symbol: "VIRTUAL", price: "$0.807", change: "-0.36%", positive: false },
-  { symbol: "CLAWD", price: "$0.000201", change: "-6.19%", positive: false },
-];
+  const totalValue = holdings.reduce((acc, h) => acc + h.balance * h.price, 0);
+
+  return (
+    <div className={styles.portfolioInterface}>
+      <div className={styles.portfolioHeader}>
+        <h3>Your Portfolio</h3>
+        <div className={styles.totalValue}>
+          <span className={styles.valueLabel}>Total Value</span>
+          <span className={styles.valueAmount}>${totalValue.toLocaleString()}</span>
+        </div>
+      </div>
+
+      {!address ? (
+        <div className={styles.connectPrompt}>
+          <p>🔒 Connect wallet to view your holdings</p>
+        </div>
+      ) : (
+        <div className={styles.holdingsList}>
+          {holdings.map(token => (
+            <div key={token.symbol} className={styles.holdingItem}>
+              <div className={styles.holdingLeft}>
+                <span className={styles.holdingSymbol}>{token.symbol}</span>
+                <span className={styles.holdingName}>{token.name}</span>
+              </div>
+              <div className={styles.holdingRight}>
+                <span className={styles.holdingBalance}>
+                  {token.balance.toFixed(token.decimals || 4)} {token.symbol}
+                </span>
+                <span className={styles.holdingValue}>
+                  ${(token.balance * token.price).toFixed(2)}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className={styles.portfolioActions}>
+        <button className={styles.portfolioAction}>
+          <span>📤</span> Send
+        </button>
+        <button className={styles.portfolioAction}>
+          <span>📥</span> Receive
+        </button>
+        <button className={styles.portfolioAction}>
+          <span>🔄</span> Bridge
+        </button>
+      </div>
+    </div>
+  );
+}
 
 type Tab = "swap" | "buy" | "portfolio";
 
 export default function Home() {
-  const { address } = useAccount();
   const [activeTab, setActiveTab] = useState<Tab>("swap");
+
+  // Market data
+  const marketData = [
+    { symbol: "cbBTC", price: "$88,345", change: "+0.14%", positive: true },
+    { symbol: "ETH", price: "$3,241", change: "+1.23%", positive: true },
+    { symbol: "USDC", price: "$1.00", change: "0.00%", positive: true },
+    { symbol: "DEGEN", price: "$0.0419", change: "-4.39%", positive: false },
+    { symbol: "VIRTUAL", price: "$0.807", change: "-0.36%", positive: false },
+    { symbol: "CLAWD", price: "$0.0002", change: "-6.19%", positive: false },
+  ];
 
   return (
     <div className={styles.container}>
-      <header className={styles.headerWrapper}>
-        <Wallet>
-          <ConnectWallet>
-            <Avatar className="h-6 w-6" />
-            <Name />
-          </ConnectWallet>
-        </Wallet>
+      <header className={styles.header}>
+        <WalletButton />
       </header>
 
       <div className={styles.content}>
@@ -137,98 +256,30 @@ export default function Home() {
             className={`${styles.tab} ${activeTab === "swap" ? styles.activeTab : ""}`}
             onClick={() => setActiveTab("swap")}
           >
-            Swap
+            🔄 Swap
           </button>
           <button
             className={`${styles.tab} ${activeTab === "buy" ? styles.activeTab : ""}`}
             onClick={() => setActiveTab("buy")}
           >
-            Buy
+            💳 Buy
           </button>
           <button
             className={`${styles.tab} ${activeTab === "portfolio" ? styles.activeTab : ""}`}
             onClick={() => setActiveTab("portfolio")}
           >
-            Portfolio
+            💼 Portfolio
           </button>
         </div>
 
-        {address ? (
-          <div className={styles.swapContainer}>
-            {activeTab === "swap" && (
-              <Swap isSponsored>
-                <SwapAmountInput
-                  label="Sell"
-                  swappableTokens={swappableTokens}
-                  token={ETHToken}
-                  type="from"
-                />
-                <SwapToggleButton />
-                <SwapAmountInput
-                  label="Buy"
-                  swappableTokens={swappableTokens}
-                  token={USDCToken}
-                  type="to"
-                />
-                <SwapButton />
-                <SwapMessage />
-                <SwapToast />
-              </Swap>
-            )}
+        {/* Tab Content */}
+        <div className={styles.tabContent}>
+          {activeTab === "swap" && <SwapInterface />}
+          {activeTab === "buy" && <BuyInterface />}
+          {activeTab === "portfolio" && <PortfolioInterface />}
+        </div>
 
-            {activeTab === "buy" && (
-              <div className={styles.buyContainer}>
-                <Buy toToken={DEGENToken} isSponsored />
-              </div>
-            )}
-
-            {activeTab === "portfolio" && (
-              <div className={styles.portfolioContainer}>
-                <div className={styles.portfolioHeader}>
-                  <h3>Your Portfolio</h3>
-                  <span className={styles.totalValue}>$0.00</span>
-                </div>
-                <div className={styles.portfolioList}>
-                  <div className={styles.portfolioItem}>
-                    <div className={styles.tokenInfo}>
-                      <span className={styles.tokenSymbol}>ETH</span>
-                      <span className={styles.tokenName}>Ethereum</span>
-                    </div>
-                    <div className={styles.tokenBalance}>
-                      <span className={styles.balance}>0.00 ETH</span>
-                      <span className={styles.balanceUsd}>$0.00</span>
-                    </div>
-                  </div>
-                  <div className={styles.portfolioItem}>
-                    <div className={styles.tokenInfo}>
-                      <span className={styles.tokenSymbol}>USDC</span>
-                      <span className={styles.tokenName}>USD Coin</span>
-                    </div>
-                    <div className={styles.tokenBalance}>
-                      <span className={styles.balance}>0.00 USDC</span>
-                      <span className={styles.balanceUsd}>$0.00</span>
-                    </div>
-                  </div>
-                </div>
-                <p className={styles.connectWalletText}>
-                  Connect wallet to view holdings
-                </p>
-              </div>
-            )}
-          </div>
-        ) : (
-          <div className={styles.connectPrompt}>
-            <p>Connect your wallet to start trading</p>
-            <Wallet>
-              <ConnectWallet className={styles.connectButton}>
-                <Avatar className="h-5 w-5" />
-                <Name />
-              </ConnectWallet>
-            </Wallet>
-          </div>
-        )}
-
-        {/* Market Data Section */}
+        {/* Market Data */}
         <div className={styles.marketSection}>
           <h3 className={styles.sectionTitle}>📈 Trending on Base</h3>
           <div className={styles.marketGrid}>
@@ -244,6 +295,7 @@ export default function Home() {
           </div>
         </div>
 
+        {/* Info Cards */}
         <div className={styles.infoCards}>
           <div className={styles.infoCard}>
             <h3>Supported Tokens</h3>
